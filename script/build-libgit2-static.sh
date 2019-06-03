@@ -2,19 +2,29 @@
 
 set -ex
 
-ROOT="$(cd "$0/../.." && echo "${PWD}")"
-BUILD_PATH="${ROOT}/static-build"
-VENDORED_PATH="${ROOT}/vendor/libgit2"
+VENDORED_PATH=vendor/libgit2
 
-mkdir -p "${BUILD_PATH}/build" "${BUILD_PATH}/install/lib"
+cd $VENDORED_PATH &&
+mkdir -p build &&
+cd build
 
-cd "${BUILD_PATH}/build" &&
-cmake -DTHREADSAFE=ON \
+if [ "$OSTYPE" = "msys" ]; then
+    cmake -DTHREADSAFE=ON \
       -DBUILD_CLAR=OFF \
       -DBUILD_SHARED_LIBS=OFF \
       -DCMAKE_C_FLAGS=-fPIC \
       -DCMAKE_BUILD_TYPE="RelWithDebInfo" \
-      -DCMAKE_INSTALL_PREFIX="${BUILD_PATH}/install" \
-      "${VENDORED_PATH}" &&
+      -DCMAKE_INSTALL_PREFIX=install \
+      -G "MSYS Makefiles" \
+      ..
+else
+    cmake -DTHREADSAFE=ON \
+      -DBUILD_CLAR=OFF \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_C_FLAGS=-fPIC \
+      -DCMAKE_BUILD_TYPE="RelWithDebInfo" \
+      -DCMAKE_INSTALL_PREFIX=install \
+      ..
+fi
 
 cmake --build . --target install
